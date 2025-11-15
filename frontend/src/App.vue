@@ -1,5 +1,6 @@
 <script setup>
-// Table items
+import {ref, reactive, watch} from 'vue'
+  // Table items
   const items = [
     {
       name: 'Account A',
@@ -119,9 +120,56 @@
     { title: 'Status', key:'status', align:'end', sortable: true }
   ]
 
+  // Pop up form conditional 
+  const dialog = ref(false)
+
+  const formRef = ref(null)
+
+  const submitted = ref(false)
+
+  // Define form data
+  const formData = ref({
+    name:'',
+    budget: '',
+    spend:'',
+    status:'In Budget'
+  })
+
+  
+  const formErrors = reactive({
+    name: '',
+    budget: '',
+    spend: '',
+    status: ''
+  })
+
+  // Form rules
+  const rules = {
+    required: (value) => !!value || 'This field is required',
+  }
+
+  
   // Add new campaign button functionality 
-  const add = () =>{
-    console.log('Add campaign clicked')
+  const addCampaign = () => {
+    submitted.value = true
+    // Checks if all fields are present
+    formErrors.name = ''
+    formErrors.budget = ''
+    formErrors.spend = ''
+    formErrors.status = ''
+
+    let hasError = false
+    if (!formData.value.name) { formErrors.name = 'Name is required'; hasError = true }
+    if (!formData.value.budget) { formErrors.budget = 'Budget is required'; hasError = true }
+    if (!formData.value.spend) { formErrors.spend = 'Spend is required'; hasError = true }
+    if (!formData.value.status) { formErrors.status = 'Status is required'; hasError = true }
+
+    if (hasError) return
+    console.log('Form submitted', formData.value)
+    items.push({ ...formData.value }) 
+    dialog.value = false             
+    formData.value = { name: '', budget: '', spend: '', status: 'In Budget' }
+    formRef.value.resetValidation()
   }
 
   // Return expected colour based on status
@@ -133,6 +181,17 @@
     default: return 'grey'
   }
 }
+
+  watch(dialog, (newVal) => {
+    if (!newVal) {
+      submitted.value = false
+      formErrors.name = ''
+      formErrors.budget = ''
+      formErrors.spend = ''
+      formErrors.status = ''
+      formData.value = { name: '', budget: '', spend: '', status: 'In Budget' }
+    }
+  })
 </script>
 
 <template>
@@ -159,7 +218,7 @@
                   rounded="lg"
                   prepend-icon="mdi-plus"
                   border
-                  @click="add"
+                  @click="dialog = true"
                 >
                 Add Campaign
                 </v-btn>
@@ -175,6 +234,58 @@
           </v-data-table>
         </v-sheet>    
       </v-container>
+
+      <!-- Add Campaign Pop-up Form -->
+      <v-dialog  v-model="dialog" max-width="500">
+          <v-card>
+            <!-- Title -->
+            <v-card-text>
+              Add New Campaign
+            </v-card-text>
+
+            <v-sheet class="mx-auto" width="300">
+              <v-form ref="formRef" @submit.prevent>
+                <v-text-field
+                  v-model="formData.name"
+                  label="Name"
+                  :error="submitted && !!formErrors.name"
+                  :error-messages="submitted ? formErrors.name : ''"
+                ></v-text-field>
+                <v-text-field
+                  v-model="formData.budget"
+                  label="Budget"
+                  type="number"
+                  :error="submitted && !!formErrors.budget"
+                  :error-messages="submitted ? formErrors.budget : ''"
+                  min="0"
+                  step="1"
+                ></v-text-field>
+                <v-text-field
+                  v-model="formData.spend"
+                  label="Spend"
+                  type="number"
+                  :error="submitted && !!formErrors.spend"
+                  :error-messages="submitted ? formErrors.spend : ''"
+                  min="0"
+                  step="1"
+                ></v-text-field>
+                <v-select
+                  v-model="formData.status"
+                  :items="['In Budget', 'Warning', 'Out of Budget']"
+                  label="Status"
+                  :error="!!formErrors.status"
+                  :error-messages="formErrors.status"
+                ></v-select>
+              </v-form>
+            </v-sheet>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+                <v-btn text="Add New Campaign" class=yellow-btn @click="addCampaign">Add</v-btn>
+                <v-btn text="Close Dialog" class=yellow-btn @click="dialog = false">Cancel</v-btn> 
+            </v-card-actions>
+          </v-card>
+      </v-dialog>
     </v-main>
   </v-app>
 </template>
