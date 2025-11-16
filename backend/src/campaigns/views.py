@@ -1,21 +1,38 @@
+import json
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from .models import Campaign
 from .forms import CampaignForm
 
 def index(request):
     return HttpResponse("Add Campaign Index")
 
+@csrf_exempt
 def add_new_campaign(request):
+    form = CampaignForm()
     if request.method == "POST":
-        form = CampaignForm(request.POST)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        
+        form = CampaignForm(data)
         if form.is_valid():
-            form.save()
-            return redirect("view")
-    else:
-        form = CampaignForm()
-
-    return render(request, "campaigns/add_campaign.html", {"form": form})
+            campaign = form.save()
+            return JsonResponse({
+                "id": campaign.id,
+                "name": campaign.name,
+                "budget": campaign.budget,
+                "spend": campaign.spend,
+                "status": campaign.status
+            })
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    elif request.method == "GET":
+        return render(request, "campaigns/add_campaign.html", {"form": form})
+    
+    return JsonResponse({"error": "Method not allowed"}, status=405)
 
 def view_all_campaigns(request):
     try:

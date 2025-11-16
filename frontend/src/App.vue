@@ -1,116 +1,9 @@
 <script setup>
-import {ref, reactive, watch} from 'vue'
+import {ref, reactive, watch, onMounted} from 'vue'
+import axios from 'axios';
+
   // Table items
-  const items = [
-    {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    }
-  ]
+  const items = ref([]);
 
   // Define headers
   const headers =[
@@ -127,12 +20,28 @@ import {ref, reactive, watch} from 'vue'
 
   const submitted = ref(false)
 
+  const STATUS_MAP = {
+    IN_BUDGET:{ label: 'In Budget',color: 'green'},
+    WARNING:{label: 'Warning', color: 'orange'},
+    OUT_OF_BUDGET:{ label: 'Out of Budget', color: 'red' },
+  };
+
+  const getStatusMeta = (statusValue) => {
+    return STATUS_MAP[statusValue] || { label: statusValue, color: 'grey' };
+  };
+
+  const statusOptions = Object.entries(STATUS_MAP).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+  }));
+
+
   // Define form data
   const formData = ref({
     name:'',
     budget: '',
     spend:'',
-    status:'In Budget'
+    status:'IN_BUDGET'
   })
 
   
@@ -143,16 +52,29 @@ import {ref, reactive, watch} from 'vue'
     status: ''
   })
 
+  //Fetch Campaigns 
+  const fetchCampaigns = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/campaigns/view/');
+      items.value = response.data; 
+    } catch (error) {
+      console.error('Failed to fetch campaigns', error);
+    }
+  };
+
+  onMounted(() => {
+    fetchCampaigns();
+  });
+
   // Form rules
   const rules = {
     required: (value) => !!value || 'This field is required',
   }
 
-  
   // Add new campaign button functionality 
-  const addCampaign = () => {
+  const addCampaign = async () => {
     submitted.value = true
-    // Checks if all fields are present
+
     formErrors.name = ''
     formErrors.budget = ''
     formErrors.spend = ''
@@ -164,23 +86,30 @@ import {ref, reactive, watch} from 'vue'
     if (!formData.value.spend) { formErrors.spend = 'Spend is required'; hasError = true }
     if (!formData.value.status) { formErrors.status = 'Status is required'; hasError = true }
 
-    if (hasError) return
-    console.log('Form submitted', formData.value)
-    items.push({ ...formData.value }) 
-    dialog.value = false             
-    formData.value = { name: '', budget: '', spend: '', status: 'In Budget' }
-    formRef.value.resetValidation()
-  }
+    if (hasError) return;
 
-  // Return expected colour based on status
-  const getStatusColor = (status) => {
-  switch (status) {
-    case 'In Budget': return 'green'
-    case 'Warning': return 'orange'
-    case 'Out of Budget': return 'red'
-    default: return 'grey'
+      try {
+        await axios.post(
+          'http://127.0.0.1:8000/campaigns/add/',
+          formData.value
+        );
+
+        // Refresh Table
+        await fetchCampaigns();
+
+        // Reset Form
+        formData.value = { name: '', budget: '', spend: '', status: 'In Budget' };
+        submitted.value = false;
+        dialog.value = false;
+      } catch (error) {
+          if (error.response) {
+            console.error('Failed to add campaign', error.response.data);
+          } else {
+            console.error('Failed to add campaign', error);
+          }
+      }
+    
   }
-}
 
   watch(dialog, (newVal) => {
     if (!newVal) {
@@ -227,8 +156,8 @@ import {ref, reactive, watch} from 'vue'
             
             <!-- Render status on traffic light system based on status -->
             <template v-slot:item.status="{ item }">
-              <v-chip :color="getStatusColor(item.status)">
-                {{ item.status }}
+              <v-chip :color="getStatusMeta(item.status).color">
+                {{ getStatusMeta(item.status).label }}
               </v-chip>
             </template>
           </v-data-table>
@@ -271,7 +200,9 @@ import {ref, reactive, watch} from 'vue'
                 ></v-text-field>
                 <v-select
                   v-model="formData.status"
-                  :items="['In Budget', 'Warning', 'Out of Budget']"
+                  :items="statusOptions"
+                  item-title="label"
+                  item-value="value"
                   label="Status"
                   :error="!!formErrors.status"
                   :error-messages="formErrors.status"

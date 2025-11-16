@@ -4,6 +4,8 @@ This folder contains the frontend for the campaign budget tracker. Technologies 
 
 Please find instructions below on how to run the frontend locally.
 
+Ensure you are in the frontend folder when running the below steps.
+
 ## Project Setup
 
 ```sh
