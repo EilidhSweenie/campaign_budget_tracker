@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AddcampaignConfig(AppConfig):
+class CampaignsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'addcampaign'
+    name = 'campaigns'
