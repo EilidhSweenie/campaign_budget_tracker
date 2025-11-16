@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Add Campaign</title>
+  </head>
+  <body>
+    <h1>Add Campaign</h1>
+    <form action="{% url 'add' %}" method="post">
+        {% csrf_token %}
+
+        <div>
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {{ form.name.errors }}
+        </div>
+
+        <div>
+            {{ form.budget.label_tag }}
+            {{ form.budget }}
+            {{ form.budget.errors }}
+        </div>
+
+        <div>
+            {{ form.spend.label_tag }}
+            {{ form.spend }}
+            {{ form.spend.errors }}
+        </div>
+
+        <div>
+            {{ form.status.label_tag }}
+            {{ form.status }}
+            {{ form.status.errors }}
+        </div>
+        <button type="submit">Add Campaign</button>
+    </form>
+  </body>
+</html>
