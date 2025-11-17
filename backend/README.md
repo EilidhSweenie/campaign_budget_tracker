@@ -17,7 +17,7 @@ This backend is implemented in Django. It contains functionality to view all cam
 | name   | string | Name of the campaign        |
 | budget | number | Total budget for campaign   |
 | spend  | number | Amount spent                |
-| status | string | One of: "In Budget", "Warning", "Out of Budget" |
+| status | string | One of: "IN_BUDGET", "WARNING", "OUT_OF_BUDGET" |
 
 **Success Response Example:**
 If submitting a POST request and the request is succesful, a JSON with the added details will be returned:
@@ -87,7 +87,7 @@ python manage.py migrate
 ```
 
 Run Local Server
-*Ensure in src/ directory*
+Ensure in src/ directory
 ```
 py manage.py runserver
 ```
