@@ -67,7 +67,7 @@ No parameters required.
     "status": "OUT_OF_BUDGET"
   }
 ]
-
+```
 ## How to Run Locally
 
 Create a Python Virtual Environment
