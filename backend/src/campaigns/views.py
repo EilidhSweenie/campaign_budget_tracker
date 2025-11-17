@@ -29,9 +29,6 @@ def add_new_campaign(request):
             })
         else:
             return JsonResponse({"errors": form.errors}, status=400)
-    elif request.method == "GET":
-        return render(request, "campaigns/add_campaign.html", {"form": form})
-    
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 def view_all_campaigns(request):

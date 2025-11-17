@@ -13,17 +13,18 @@ import axios from 'axios';
     { title: 'Status', key:'status', align:'end', sortable: true }
   ]
 
-  // Pop up form conditional 
+  // Initialise conditionals 
   const dialog = ref(false)
 
   const formRef = ref(null)
 
   const submitted = ref(false)
 
+  // Map status code to chip colour, user friendly label and status code used in backend.
   const STATUS_MAP = {
-    IN_BUDGET:{ label: 'In Budget',color: 'green'},
-    WARNING:{label: 'Warning', color: 'orange'},
-    OUT_OF_BUDGET:{ label: 'Out of Budget', color: 'red' },
+    IN_BUDGET:{ label: 'In Budget',color: '#33FF5F'},
+    WARNING:{label: 'Warning', color: '#FFDD33'},
+    OUT_OF_BUDGET:{ label: 'Out of Budget', color: '#FF3333' },
   };
 
   const getStatusMeta = (statusValue) => {
@@ -44,7 +45,7 @@ import axios from 'axios';
     status:'IN_BUDGET'
   })
 
-  
+  // Define form errors
   const formErrors = reactive({
     name: '',
     budget: '',
@@ -111,6 +112,7 @@ import axios from 'axios';
     
   }
 
+  // Reset popup values
   watch(dialog, (newVal) => {
     if (!newVal) {
       submitted.value = false
@@ -156,7 +158,10 @@ import axios from 'axios';
             
             <!-- Render status on traffic light system based on status -->
             <template v-slot:item.status="{ item }">
-              <v-chip :color="getStatusMeta(item.status).color">
+              <v-chip 
+                variant="flat"
+                class="status-chip"
+                :style="{ backgroundColor: getStatusMeta(item.status).color}">
                 {{ getStatusMeta(item.status).label }}
               </v-chip>
             </template>
@@ -223,11 +228,21 @@ import axios from 'axios';
   
 
 <style>
+  /* Button Styles */
   .yellow-btn {
     background-color: #FFDD33; 
   }
   .yellow-btn .v-btn__content,
   .yellow-btn .v-icon {
     color: #000 !important;
+  }
+
+  /* Chip Styling */
+  .status-chip {
+    border-radius: 8px !important; 
+  }
+
+  .status-chip .v-chip__content{
+    color: #000 !important;      
   }
 </style>

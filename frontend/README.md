@@ -6,20 +6,16 @@ Please find instructions below on how to run the frontend locally.
 
 Ensure you are in the frontend folder when running the below steps.
 
-## Project Setup
+## Install Dependencies
 
-```sh
+```
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Run Development Frontend
 
-```sh
+```
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+The frontend will be available at this path: http://localhost:5173/
