@@ -1,4 +1,4 @@
-# frontend
+# Frontend
 
 This folder contains the frontend for the campaign budget tracker. Technologies used: Vue, Vuetify.
 
