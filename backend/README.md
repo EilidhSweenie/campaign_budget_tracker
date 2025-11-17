@@ -1,5 +1,5 @@
 # Backend
-This backend is implemented in Django. 
+This backend is implemented in Django. It contains functionality to view all campaigns and add a new campaign.
 
 ## Request and Response Structure
 ### 1. `add_new_campaign`

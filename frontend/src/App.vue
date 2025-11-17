@@ -13,6 +13,9 @@ import axios from 'axios';
     { title: 'Status', key:'status', align:'end', sortable: true }
   ]
 
+  // Create base url
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
   // Initialise conditionals 
   const dialog = ref(false)
 
@@ -56,7 +59,7 @@ import axios from 'axios';
   //Fetch Campaigns 
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/campaigns/view/');
+      const response = await axios.get(`${API_BASE_URL}/campaigns/view/`);
       items.value = response.data; 
     } catch (error) {
       console.error('Failed to fetch campaigns', error);
@@ -66,11 +69,6 @@ import axios from 'axios';
   onMounted(() => {
     fetchCampaigns();
   });
-
-  // Form rules
-  const rules = {
-    required: (value) => !!value || 'This field is required',
-  }
 
   // Add new campaign button functionality 
   const addCampaign = async () => {
@@ -91,7 +89,7 @@ import axios from 'axios';
 
       try {
         await axios.post(
-          'http://127.0.0.1:8000/campaigns/add/',
+          `${API_BASE_URL}/campaigns/add/`,
           formData.value
         );
 
