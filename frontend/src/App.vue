@@ -1,116 +1,9 @@
 <script setup>
-import {ref, reactive, watch} from 'vue'
+import {ref, reactive, watch, onMounted} from 'vue'
+import axios from 'axios';
+
   // Table items
-  const items = [
-    {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    },
-        {
-      name: 'Account A',
-      budget: '£10000',
-      spend: '£50',
-      status: 'In Budget',
-    },
-    {
-      name: 'Account B',
-      budget: '£100',
-      spend: '£50',
-      status: 'Warning',
-    },
-    {
-      name: 'Account C',
-      budget: '£10',
-      spend: '£50',
-      status: 'Out of Budget',
-    }
-  ]
+  const items = ref([]);
 
   // Define headers
   const headers =[
@@ -120,22 +13,42 @@ import {ref, reactive, watch} from 'vue'
     { title: 'Status', key:'status', align:'end', sortable: true }
   ]
 
-  // Pop up form conditional 
+  // Create base url
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+  // Initialise conditionals 
   const dialog = ref(false)
 
   const formRef = ref(null)
 
   const submitted = ref(false)
 
+  // Map status code to chip colour, user friendly label and status code used in backend.
+  const STATUS_MAP = {
+    IN_BUDGET:{ label: 'In Budget',color: '#33FF5F'},
+    WARNING:{label: 'Warning', color: '#FFDD33'},
+    OUT_OF_BUDGET:{ label: 'Out of Budget', color: '#FF3333' },
+  };
+
+  const getStatusMeta = (statusValue) => {
+    return STATUS_MAP[statusValue] || { label: statusValue, color: 'grey' };
+  };
+
+  const statusOptions = Object.entries(STATUS_MAP).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+  }));
+
+
   // Define form data
   const formData = ref({
     name:'',
     budget: '',
     spend:'',
-    status:'In Budget'
+    status:'IN_BUDGET'
   })
 
-  
+  // Define form errors
   const formErrors = reactive({
     name: '',
     budget: '',
@@ -143,16 +56,24 @@ import {ref, reactive, watch} from 'vue'
     status: ''
   })
 
-  // Form rules
-  const rules = {
-    required: (value) => !!value || 'This field is required',
-  }
+  //Fetch Campaigns 
+  const fetchCampaigns = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/campaigns/view/`);
+      items.value = response.data; 
+    } catch (error) {
+      console.error('Failed to fetch campaigns', error);
+    }
+  };
 
-  
+  onMounted(() => {
+    fetchCampaigns();
+  });
+
   // Add new campaign button functionality 
-  const addCampaign = () => {
+  const addCampaign = async () => {
     submitted.value = true
-    // Checks if all fields are present
+
     formErrors.name = ''
     formErrors.budget = ''
     formErrors.spend = ''
@@ -164,24 +85,32 @@ import {ref, reactive, watch} from 'vue'
     if (!formData.value.spend) { formErrors.spend = 'Spend is required'; hasError = true }
     if (!formData.value.status) { formErrors.status = 'Status is required'; hasError = true }
 
-    if (hasError) return
-    console.log('Form submitted', formData.value)
-    items.push({ ...formData.value }) 
-    dialog.value = false             
-    formData.value = { name: '', budget: '', spend: '', status: 'In Budget' }
-    formRef.value.resetValidation()
+    if (hasError) return;
+
+      try {
+        await axios.post(
+          `${API_BASE_URL}/campaigns/add/`,
+          formData.value
+        );
+
+        // Refresh Table
+        await fetchCampaigns();
+
+        // Reset Form
+        formData.value = { name: '', budget: '', spend: '', status: 'In Budget' };
+        submitted.value = false;
+        dialog.value = false;
+      } catch (error) {
+          if (error.response) {
+            console.error('Failed to add campaign', error.response.data);
+          } else {
+            console.error('Failed to add campaign', error);
+          }
+      }
+    
   }
 
-  // Return expected colour based on status
-  const getStatusColor = (status) => {
-  switch (status) {
-    case 'In Budget': return 'green'
-    case 'Warning': return 'orange'
-    case 'Out of Budget': return 'red'
-    default: return 'grey'
-  }
-}
-
+  // Reset popup values
   watch(dialog, (newVal) => {
     if (!newVal) {
       submitted.value = false
@@ -227,8 +156,11 @@ import {ref, reactive, watch} from 'vue'
             
             <!-- Render status on traffic light system based on status -->
             <template v-slot:item.status="{ item }">
-              <v-chip :color="getStatusColor(item.status)">
-                {{ item.status }}
+              <v-chip 
+                variant="flat"
+                class="status-chip"
+                :style="{ backgroundColor: getStatusMeta(item.status).color}">
+                {{ getStatusMeta(item.status).label }}
               </v-chip>
             </template>
           </v-data-table>
@@ -271,7 +203,9 @@ import {ref, reactive, watch} from 'vue'
                 ></v-text-field>
                 <v-select
                   v-model="formData.status"
-                  :items="['In Budget', 'Warning', 'Out of Budget']"
+                  :items="statusOptions"
+                  item-title="label"
+                  item-value="value"
                   label="Status"
                   :error="!!formErrors.status"
                   :error-messages="formErrors.status"
@@ -292,11 +226,21 @@ import {ref, reactive, watch} from 'vue'
   
 
 <style>
+  /* Button Styles */
   .yellow-btn {
     background-color: #FFDD33; 
   }
   .yellow-btn .v-btn__content,
   .yellow-btn .v-icon {
     color: #000 !important;
+  }
+
+  /* Chip Styling */
+  .status-chip {
+    border-radius: 8px !important; 
+  }
+
+  .status-chip .v-chip__content{
+    color: #000 !important;      
   }
 </style>

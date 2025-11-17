@@ -4,20 +4,18 @@ This folder contains the frontend for the campaign budget tracker. Technologies 
 
 Please find instructions below on how to run the frontend locally.
 
-## Project Setup
+Ensure you are in the frontend folder when running the below steps.
 
-```sh
+## Install Dependencies
+
+```
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Run Development Frontend
 
-```sh
+```
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+The frontend will be available at this path: http://localhost:5173/

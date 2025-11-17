@@ -1,16 +1,13 @@
 # Backend
-This backend is implemented in Django. 
+This backend is implemented in Django. It contains functionality to view all campaigns and add a new campaign.
 
-## Requests and Responses
+## Request and Response Structure
 ### 1. `add_new_campaign`
 
 **URL:** `/campaigns/add/`  
 **Method:** `GET` or `POST`  
 
 **Request:**
-
-- **GET:**  
-  Returns the HTML form for adding a new campaign.  
 
 - **POST:**  
   Form data submitted to create a new campaign. Example fields:
@@ -21,6 +18,18 @@ This backend is implemented in Django.
 | budget | number | Total budget for campaign   |
 | spend  | number | Amount spent                |
 | status | string | One of: "In Budget", "Warning", "Out of Budget" |
+
+**Success Response Example:**
+If submitting a POST request and the request is succesful, a JSON with the added details will be returned:
+```json
+  {
+    "id": 1,
+    "name": "Account A",
+    "budget": 1000,
+    "spend": 50,
+    "status": "IN_BUDGET"
+  }
+```
 
 ## 2. `view_all_campaigns`
 
@@ -41,25 +50,26 @@ No parameters required.
     "name": "Account A",
     "budget": 1000,
     "spend": 50,
-    "status": "In Budget"
+    "status": "IN_BUDGET"
   },
   {
     "id": 2,
     "name": "Account B",
     "budget": 500,
     "spend": 300,
-    "status": "Warning"
+    "status": "WARNING"
   },
   {
     "id": 3,
     "name": "Account C",
     "budget": 100,
     "spend": 150,
-    "status": "Out of Budget"
+    "status": "OUT_OF_BUDGET"
   }
 ]
 
 ## How to Run Locally
+
 Create a Python Virtual Environment
 ```
 python -m venv backend_env

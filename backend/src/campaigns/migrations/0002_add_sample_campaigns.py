@@ -4,9 +4,9 @@ def add_sample_campaigns(apps, schema_editor):
     Campaign = apps.get_model("campaigns", "Campaign")
     if Campaign.objects.exists():
         return
-    Campaign.objects.create(name="Account A", budget=1000, spend=50, status="In Budget")
-    Campaign.objects.create(name="Account B", budget=500, spend=300, status="Warning")
-    Campaign.objects.create(name="Account C", budget=100, spend=150, status="Out of Budget")
+    Campaign.objects.create(name="Account A", budget=1000, spend=50, status="IN_BUDGET")
+    Campaign.objects.create(name="Account B", budget=500, spend=300, status="WARNING")
+    Campaign.objects.create(name="Account C", budget=100, spend=150, status="OUT_OF_BUDGET")
 
 def remove_sample_campaigns(apps, schema_editor):
     Campaign = apps.get_model("campaigns", "Campaign")
